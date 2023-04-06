@@ -6,34 +6,35 @@ import os
 import shutil
 
 class CompareWithCopy:
-    __firstList = []
-    __secondList = []
+    __firstDict = {}
+    __secondDict = {}
 
     def __init__(self, first, second):
-        self.__firstList = first
-        self.__secondList = second
+        self.__firstDict = first
+        self.__secondDict = second
+
+    def IsFound(self, element):
+        if element in self.__secondDict:
+            return True
+        else:
+            return False
 
     def compareLists(self):
         """Compare Two lists, the second with the first
          the files of the first list is will append to the new list
          if they are all not in the second list """
-        counter = 0
-        lis = []
-        if (self.__secondList == []):
-            for element in self.__firstList:
-                lis.append(element)
+
+        dic = {}
+        # if the dict is empty, so all elements in first dict will be the difference
+        if (not self.__secondDict):
+            dic = self.__firstDict
         else:
-            for element in self.__firstList:
-                for element2 in self.__secondList:
-                    if element == element2:
-                        counter = 0
-                        break
-                    else:
-                        counter += 1
-                    if counter == (len(self.__secondList)):
-                        counter = 0
-                        lis.append(element)
-        return lis
+            for element in self.__firstDict:
+                if self.IsFound(element):
+                    pass
+                else:
+                    dic[element] = self.__firstDict[element]
+        return dic
 
     def __copyOneFile(self, source, destination, counter, len_lis):
         """get source --> is the file name in with the folder name get from difference list
@@ -56,29 +57,35 @@ class CompareWithCopy:
         except:
             print("Error occurred while copying file.")
 
-    def __makeCopy(self, listDiff, path_destination, counter=0):
+    def __makeCopy(self, dictDiff, path_destination, counter=0):
         """this function that handle the copy operation"""
-        lengthList = len(listDiff)
-        for i in listDiff:
+        lengthDict = len(dictDiff)
+        for i in dictDiff:
             counter += 1
-            self.__copyOneFile(source = i, destination= path_destination, counter = counter, len_lis= lengthList)
+            self.__copyOneFile(source = i, destination= path_destination, counter = counter, len_lis= lengthDict)
 
     def askForCopyOrCompareOnly(self):
         """this function to ask the user if he wants to copy the difference list
          into a specific location or want to print it only"""
         differenceList = self.compareLists()
-        response = input("if you want to copy this files press 1, if you want to show differance files only press 2 : ")
-        if response == "1":
-            while True:
-                path1 = input("Please Enter Destination Path to Save the Difference Files in it : ")
-                if os.path.isdir(path1):
-                    self.__makeCopy(differenceList, path1)
-                    break
-                else:
-                    print("please enter valid destination path")
-        elif response == "2":
-            for file in differenceList:
-                print(file)
+        if differenceList:
+            response = input("if you want to copy this files press 1, if you want to show differance files only press 2 : ")
+            if response == "1":
+                while True:
+                    path1 = input("Please Enter Destination Path to Save the Difference Files in it : ")
+                    if os.path.isdir(path1):
+                        self.__makeCopy(differenceList, path1)
+                        break
+                    else:
+                        print("please enter valid destination path")
+            elif response == "2":
+                counter = 0
+                for i in differenceList:
+                    counter += 1
+                    print(str(counter + 1) + " - " + differenceList[i] + "\\" + i)
+            else:
+                print("Please Enter Valid Input")
+                self.askForCopyOrCompareOnly()
         else:
-            print("Please Enter Valid Input")
-            self.askForCopyOrCompareOnly()
+            print("No Difference between the two list of folders")
+
